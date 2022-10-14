@@ -402,6 +402,7 @@ import javax.enterprise.context.ApplicationScoped;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
+import io.quarkus.oidc.OidcRequestContext;
 import io.quarkus.oidc.OidcTenantConfig;
 import io.quarkus.oidc.TenantConfigResolver;
 import io.vertx.ext.web.RoutingContext;
@@ -410,23 +411,23 @@ import io.vertx.ext.web.RoutingContext;
 public class CustomTenantConfigResolver implements TenantConfigResolver {
 
     @Override
-    public Uni<OidcTenantConfig> resolve(RoutingContext context, TenantConfigResolver.TenantConfigRequestContext requestContext) {
+    public Uni<OidcTenantConfig> resolve(RoutingContext context, OidcRequestContext<OidcTenantConfig> requestContext) {
         String path = context.request().path();
         String[] parts = path.split("/");
 
         if (parts.length == 0) {
             // resolve to default tenant configuration
-            return null;
+            return Uni.createFrom().nullItem();
         }
 
         if ("tenant-c".equals(parts[1])) {
             // Do 'return requestContext.runBlocking(createTenantConfig());'
             // if a blocking call is required to create a tenant config
-            return Uni.createFromItem(createTenantConfig());
+            return Uni.createFrom().item(createTenantConfig());
         }
 
         // resolve to default tenant configuration
-        return null;
+        return Uni.createFrom().nullItem();
     }
 
     private Supplier<OidcTenantConfig> createTenantConfig() {
